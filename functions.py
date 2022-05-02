@@ -47,7 +47,6 @@ class Graph:
         for node in self.nodes:
             local_coef, k = self.local_coef(node)
             if k > 1:
-                # clustering_coefficient = 2 * local_coef / (k * (k - 1))
                 res += local_coef
 
         return res / len(self.nodes)
