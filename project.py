@@ -1,6 +1,5 @@
 import networkx as nx
 from functions import Graph
-from gen_graph import generate_graph
 
 astro = nx.read_edgelist("CA-AstroPh.txt", create_using=nx.Graph(), nodetype=int)
 astro_graph = Graph(astro)
@@ -14,9 +13,9 @@ print('глобальный кластерный коэффициент: ', astr
 print('максимальная степень: ', astro_graph.max_degree())
 print('минимальная степень: ', astro_graph.min_degree())
 print('средняя степень: ', astro_graph.mean_degree())
-# astro_graph.show_probability_function()
-# astro_graph.show_hist()
-# astro_graph.show_log()
+astro_graph.show_probability_function()
+astro_graph.show_hist()
+astro_graph.show_log()
 print('Количество треугольников:', astro_graph.triangles())
 
 google = nx.read_edgelist("web-Google.txt", create_using=nx.Graph(), nodetype=int)
@@ -30,9 +29,9 @@ print('глобальный кластерный коэффициент: ', goog
 print('максимальная степень: ', google_graph.max_degree())
 print('минимальная степень: ', google_graph.min_degree())
 print('средняя степень: ', google_graph.mean_degree())
-# google_graph.show_probability_function()
-# google_graph.show_hist()
-# google_graph.show_log()
+google_graph.show_probability_function()
+google_graph.show_hist()
+google_graph.show_log()
 print('Количество треугольников:', google_graph.triangles())
 
 vk = open('vk.csv', "r")
@@ -49,7 +48,8 @@ print('глобальный кластерный коэффициент: ', vk_g
 print('максимальная степень: ', vk_graph.max_degree())
 print('минимальная степень: ', vk_graph.min_degree())
 print('средняя степень: ', vk_graph.mean_degree())
-# vk_graph.show_probability_function()
-# vk_graph.show_hist()
-# vk_graph.show_log()
+vk_graph.show_probability_function()
+vk_graph.show_hist()
+vk_graph.show_log()
 print('Количество треугольников:', vk_graph.triangles())
+

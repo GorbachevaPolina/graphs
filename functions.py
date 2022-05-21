@@ -9,10 +9,10 @@ class Graph:
         self.edges = list(nx.edges(graph))
 
     def count_nodes(self):
-        return self.g.number_of_nodes()
+        return len(self.nodes)
 
     def count_edges(self):
-        return self.g.number_of_edges()
+        return len(self.edges)
 
     def density(self):
         v = self.count_nodes()
@@ -77,7 +77,7 @@ class Graph:
 
     def show_probability_function(self):
         res = self.probability()
-        plt.plot([row[0] for row in res], [row[1] for row in res])
+        plt.plot([row[0] for row in res], [row[1] for row in res], 'bs')
         plt.show()
 
     def show_hist(self):
@@ -91,7 +91,7 @@ class Graph:
 
     def show_log(self):
         res = self.probability()
-        plt.loglog([row[0] for row in res], [row[1] for row in res])
+        plt.loglog([row[0] for row in res], [row[1] for row in res], 'bs')
         plt.show()
 
     @staticmethod
