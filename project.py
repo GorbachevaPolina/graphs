@@ -1,8 +1,12 @@
 import networkx as nx
 from functions import Graph
+from gen_graph import generate_graph
+
+
 
 astro = nx.read_edgelist("CA-AstroPh.txt", create_using=nx.Graph(), nodetype=int)
 astro_graph = Graph(astro)
+
 
 print('Результаты для первого графа:')
 print('количество вершин: ', len(astro_graph.nodes))

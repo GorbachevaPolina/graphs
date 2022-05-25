@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 class Graph:
     def __init__(self, graph):
-        self.g = graph
+        # self.g = graph
         self.nodes = list(nx.nodes(graph))
         self.edges = list(nx.edges(graph))
 
@@ -20,10 +20,18 @@ class Graph:
         return e / ((v*(v-1))/2)
 
     def neighbors(self, node):
-        return list(self.g[node])
+        # return list(self.g[node])
+        n = []
+        for edge in self.edges:
+            if edge[0] == node:
+                n.append(edge[1])
+            elif edge[1] == node:
+                n.append(edge[0])
+        return n
 
     def has_edge(self, u, v):
-        return v in list(self.g[u])
+        # return v in list(self.g[u])
+        return v in self.neighbors(u)
 
     def degree(self, node):
         neighbors = self.neighbors(node)
