@@ -290,21 +290,24 @@ class Graph:
             index = sample.index(node)
             visited = [False] * self.count_nodes()
             dst_all = [-1] * self.count_nodes()
+            count_visit = n - 1 - index
 
             distances[index][index] = 0
             dst_all[self.nodes.index(node)] = 0
             visited[self.nodes.index(node)] = True
             nodes_in_check.append(node)
 
-            while nodes_in_check:
+            while nodes_in_check and count_visit > 0:
                 v = nodes_in_check.pop()
                 for neighbour in self.neighbors(v):
                     if not visited[self.nodes.index(neighbour)]:
                         visited[self.nodes.index(neighbour)] = True
                         nodes_in_check.append(neighbour)
                         dst_all[self.nodes.index(neighbour)] = dst_all[self.nodes.index(v)] + 1
-                        if neighbour in sample:
+                        if neighbour in sample and index < sample.index(neighbour):
                             distances[index][sample.index(neighbour)] = dst_all[self.nodes.index(neighbour)]
+                            distances[sample.index(neighbour)][index] = dst_all[self.nodes.index(neighbour)]
+                            count_visit -= 1
         return distances
 
     def eccentricity(self, distances):
