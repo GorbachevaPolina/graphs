@@ -113,14 +113,14 @@ class Graph:
         plt.plot([row[0] for row in res], [row[1] for row in res])
         plt.show()
 
-    def show_hist(self):
-        res = self.probability()
-        plt.hist([row[0] for row in res],
-                 histtype='step',
-                 cumulative=True,
-                 bins=len([row[0] for row in res]),
-                 weights=[row[1] for row in res])
-        plt.show()
+    # def show_hist(self):
+    #     res = self.probability()
+    #     plt.hist([row[0] for row in res],
+    #              histtype='step',
+    #              cumulative=True,
+    #              bins=len([row[0] for row in res]),
+    #              weights=[row[1] for row in res])
+    #     plt.show()
 
     def show_log(self):
         res = self.probability()
@@ -282,56 +282,49 @@ class Graph:
         else:
             sample = component
 
-        n = len(sample)
-        distances = [[-1] * n for i in range(n)]
+        n = len(component)
+        eccentricity = set()
+        distances_for_perc = set()
 
         for node in sample:
+            print(node)
+            distance = dict()
             nodes_in_check = []
-            index = sample.index(node)
             visited = set()
-            dst_all = dict()
-            count_visit = n - 1 - index
+            dst_sample = set()
 
-            distances[index][index] = 0
-            dst_all[node] = 0
+            distance[node] = 0
             visited.add(node)
             nodes_in_check.append(node)
 
-            while nodes_in_check and count_visit > 0:
-                v = nodes_in_check.pop()
+            while nodes_in_check:
+                v = nodes_in_check.pop(0)
                 for neighbour in self.neighbors(v):
                     if neighbour not in visited:
                         visited.add(neighbour)
                         nodes_in_check.append(neighbour)
-                        # neigh_ind = self.nodes.index(neighbour)
-                        dst_all[neighbour] = dst_all[v] + 1
-                        if neighbour in sample and index < sample.index(neighbour):
-                            distances[index][sample.index(neighbour)] = dst_all[neighbour]
-                            distances[sample.index(neighbour)][index] = dst_all[neighbour]
-                            count_visit -= 1
+                        distance[neighbour] = distance[v] + 1
+                        if neighbour in sample:
+                            dst_sample.add(distance[neighbour])
+                            distances_for_perc.add(distance[neighbour])
+            max_dist = 0
+            for dist in dst_sample:
+                max_dist = max(max_dist, dist)
+            eccentricity.add(max_dist)
 
-        n = len(distances[0])
-        eccentricity = [-1] * n
-        for i in range(n):
-            for j in range(n):
-                eccentricity[i] = max(eccentricity[i], distances[i][j])
-        radius = eccentricity[0]
-        d = eccentricity[0]
-        for i in range(len(eccentricity)):
-            radius = min(radius, eccentricity[i])
-            d = max(d, eccentricity[i])
+        radius = 999999999
+        d = -1
+        for e in eccentricity:
+            radius = min(radius, e)
+            d = max(d, e)
         print('оценка радиуса: ', radius)
         print('оценка диаметра: ', d)
 
-        dsts = []
-        for i in range(len(distances[0])):
-            for j in range(i + 1, len(distances[0])):
-                dsts.append(distances[i][j])
-        dsts.sort()
-        perc = dsts[int(len(dsts) * 0.9)]
+        distances_for_perc.sort()
+        perc = distances_for_perc[int(len(distances_for_perc) * 0.9)]
         print('90 процентиль:', perc)
 
-        return distances
+        return perc
 
     def eccentricity(self, distances):
         n = len(distances[0])
@@ -372,9 +365,7 @@ class Graph:
         for node in remove_nodes:
             self.remove_node(node)
             print(node)
-        return self.weakly_comp_with_max_power()
-        # nx.remove_nodes_from(self.g, remove_nodes)
-        # return max(nx.connected_components(self.g), key=len) / nx.number_of_nodes(self.g)
+        return self.weakly_comp_with_max_power() / self.count_nodes()
 
     def remove_x_perc_max_degree(self, x):
         amount = int(self.count_nodes() * x / 100)
@@ -387,4 +378,4 @@ class Graph:
             curr_node = degrees[i][0]
             self.remove_node(curr_node)
             i += 1
-        return self.weakly_comp_with_max_power()
+        return self.weakly_comp_with_max_power() / self.count_nodes()
