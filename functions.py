@@ -132,14 +132,26 @@ class Graph:
         return list(set(n_u) & set(n_v))
 
     def triangles(self):
+        # t = 0
+        # for u in self.nodes:
+        #     neighbors_u = self.neighbors(u)
+        #     for v in neighbors_u:
+        #         neighbors_v = self.neighbors(v)
+        #         S = self.intersection(neighbors_u, neighbors_v)
+        #         t += len(S)
+        # return t // 6
         t = 0
-        for u in self.nodes:
-            neighbors_u = self.neighbors(u)
-            for v in neighbors_u:
-                neighbors_v = self.neighbors(v)
+        for edge in self.edges:
+            if edge[0] != edge[1]:
+                neighbors_u = self.neighbors(edge[0])
+                neighbors_v = self.neighbors(edge[1])
                 S = self.intersection(neighbors_u, neighbors_v)
+                if edge[0] in S:
+                    S.remove(edge[0])
+                elif edge[1] in S:
+                    S.remove(edge[1])
                 t += len(S)
-        return t // 6
+        return t // 3
 
     def weak_components(self):
         visited = set()
