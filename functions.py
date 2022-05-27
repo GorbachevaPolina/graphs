@@ -5,7 +5,7 @@ import random
 
 class Graph:
     def __init__(self, graph):
-        # self.g = graph
+        self.g = graph
         self.nodes = list(nx.nodes(graph))
         self.edges = list(nx.edges(graph))
 
@@ -37,14 +37,14 @@ class Graph:
         return e / ((v*(v-1))/2)
 
     def neighbors(self, node):
-        # return list(self.g[node])
-        n = []
-        for edge in self.edges:
-            if edge[0] == node:
-                n.append(edge[1])
-            elif edge[1] == node:
-                n.append(edge[0])
-        return n
+        return list(self.g[node])
+        # n = []
+        # for edge in self.edges:
+        #     if edge[0] == node:
+        #         n.append(edge[1])
+        #     elif edge[1] == node:
+        #         n.append(edge[0])
+        # return n
 
     def di_neighbors(self, node):
         # return list(self.g[node])
@@ -55,8 +55,8 @@ class Graph:
         return n
 
     def has_edge(self, u, v):
-        # return v in list(self.g[u])
-        return v in self.neighbors(u)
+        return v in list(self.g[u])
+        # return v in self.neighbors(u)
 
     def degree(self, node):
         neighbors = self.neighbors(node)
@@ -136,9 +136,14 @@ class Graph:
         # for u in self.nodes:
         #     neighbors_u = self.neighbors(u)
         #     for v in neighbors_u:
-        #         neighbors_v = self.neighbors(v)
-        #         S = self.intersection(neighbors_u, neighbors_v)
-        #         t += len(S)
+        #         if v != u:
+        #             neighbors_v = self.neighbors(v)
+        #             S = self.intersection(neighbors_u, neighbors_v)
+        #             if u in S:
+        #                 S.remove(u)
+        #             if v in S:
+        #                 S.remove(v)
+        #             t += len(S)
         # return t // 6
         t = 0
         for edge in self.edges:
@@ -146,10 +151,11 @@ class Graph:
                 neighbors_u = self.neighbors(edge[0])
                 neighbors_v = self.neighbors(edge[1])
                 S = self.intersection(neighbors_u, neighbors_v)
-                if edge[0] in S:
-                    S.remove(edge[0])
-                elif edge[1] in S:
-                    S.remove(edge[1])
+                # if edge[0] in S:
+                #     S.remove(edge[0])
+                # if edge[1] in S:
+                #     S.remove(edge[1])
+                S = [x for x in S if x != edge[0] and x != edge[1]]
                 t += len(S)
         return t // 3
 
@@ -299,7 +305,6 @@ class Graph:
         distances_for_perc = set()
 
         for node in sample:
-            print(node)
             distance = dict()
             nodes_in_check = []
             visited = set()
@@ -323,45 +328,48 @@ class Graph:
             for dist in dst_sample:
                 max_dist = max(max_dist, dist)
             eccentricity.add(max_dist)
+        # print(distance)
+        # return list(distance.items())
+        distances_for_perc = sorted(list(distances_for_perc))
+        return [eccentricity, distances_for_perc]
 
-        radius = 999999999
-        d = -1
-        for e in eccentricity:
-            radius = min(radius, e)
-            d = max(d, e)
-        print('оценка радиуса: ', radius)
-        print('оценка диаметра: ', d)
+        # radius = 999999999
+        # d = -1
+        # for e in eccentricity:
+        #     radius = min(radius, e)
+        #     d = max(d, e)
 
-        distances_for_perc.sort()
-        perc = distances_for_perc[int(len(distances_for_perc) * 0.9)]
-        print('90 процентиль:', perc)
+        # distances_for_perc = sorted(list(distances_for_perc))
+        # perc = distances_for_perc[int(len(distances_for_perc) * 0.9)]
 
-        return perc
+        # return [radius, d, perc]
 
-    def eccentricity(self, distances):
-        n = len(distances[0])
-        eccentricity = [-1] * n
-        for i in range(n):
-            for j in range(n):
-                eccentricity[i] = max(eccentricity[i], distances[i][j])
-        return eccentricity
+    # def eccentricity(self, distances):
+        # n = len(distances[0])
+        # eccentricity = [-1] * n
+        # for i in range(n):
+        #     for j in range(n):
+        #         eccentricity[i] = max(eccentricity[i], distances[i][j])
+        # return eccentricity
 
     def radius(self):
-        eccentricity = self.eccentricity(self.distances_500())
+        eccentricity = list(self.distances_500()[0])
+        # eccentricity = self.eccentricity(self.distances_500())
         radius = eccentricity[0]
         for i in range(len(eccentricity)):
             radius = min(radius, eccentricity[i])
         return radius
 
     def diameter(self):
-        eccentricity = self.eccentricity(self.distances_500())
+        # eccentricity = self.eccentricity(self.distances_500())
+        eccentricity = list(self.distances_500()[0])
         d = eccentricity[0]
         for i in range(len(eccentricity)):
             d = max(d, eccentricity[i])
         return d
     
     def percentile_90(self):
-        distances = self.distances_500()
+        distances = list(self.distances_500()[1])
 
         dsts = []
         for i in range(len(distances[0])):
