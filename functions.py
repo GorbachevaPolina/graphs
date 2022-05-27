@@ -5,7 +5,7 @@ import random
 
 class Graph:
     def __init__(self, graph):
-        self.g = graph
+        self.g = graph.adj
         self.nodes = list(nx.nodes(graph))
         self.edges = list(nx.edges(graph))
 
