@@ -9,9 +9,9 @@ print('1. Число вершин')
 print('2. Число ребер')
 print('3. Плотность')
 print('4. Число  компонент  слабой связности')
-print('5. Доля вершин в наибольшей компоненте слабой связности')
+print('5. Количество вершин в наибольшей компоненте слабой связности')
 print('6. Число  компонент  сильной связности')
-print('7. Доля вершин в наибольшей компоненте сильной связности')
+print('7. Количество вершин в наибольшей компоненте сильной связности')
 print('8. Оценка радиуса')
 print('9. Оценка диаметра')
 print('10. Оценка 90 процентиля')
@@ -34,27 +34,29 @@ elif a == 2:
 elif a == 3:
     print('Плотность: ', test_graph.density())
 elif a == 4:
-    print('Количество компонент слабой связности: ', test_graph.weak_components())
+    print('Количество компонент слабой связности: ', test_graph.number_weakly_components())
 elif a == 5:
-    print('Доля вершин в наибольшей компоненте слабой связности: ', test_graph.weakly_comp_with_max_power())
+    print('Количество вершин в наибольшей компоненте слабой связности: ',
+          len(test_graph.weakly_comp_with_max_power()))
 elif a == 6:
     di_test = nx.read_edgelist("test.txt", create_using=nx.DiGraph(), nodetype=int)
     di_test_graph = Graph(di_test)
-    print('Количество компонент сильной связности: ', di_test_graph.strong_components())
+    print('Количество компонент сильной связности: ', di_test_graph.number_strongly_components())
 elif a == 7:
     di_test = nx.read_edgelist("test.txt", create_using=nx.DiGraph(), nodetype=int)
     di_test_graph = Graph(di_test)
-    print('Доля вершин в наибольшей компоненте слабой связности: ', test_graph.weakly_comp_with_max_power())
+    print('Количество вершин в наибольшей компоненте сильной связности: ',
+          len(test_graph.strongly_comp_with_max_power()))
 elif a == 8:
     print('Оценка радиуса наибольшей компоненты слабой связности: ', test_graph.radius())
 elif a == 9:
     print('Оценка диаметра наибольшей компоненты слабой связности: ', test_graph.diameter())
 elif a == 10:
-    print('90 процентиль расстояния наибольшей компоненты слабой связности: ', test_graph.percentile_90())
+    print('90 процентиль расстояния наибольшей компоненты слабой связности: ', test_graph.percentile())
 elif a == 11:
     di_test = nx.read_edgelist("test.txt", create_using=nx.DiGraph(), nodetype=int)
     di_test_graph = Graph(di_test)
-    di_test_graph.meta_graph()
+    print('Мета граф: ', di_test_graph.meta_graph())
 elif a == 12:
     print('Количество треугольников:', test_graph.triangles())
 elif a == 13:
@@ -69,7 +71,6 @@ elif a == 17:
     print('Максимальная степень: ', test_graph.max_degree())
 elif a == 18:
     test_graph.show_probability_function()
-    test_graph.show_hist()
 elif a == 19:
     test_graph.show_log()
 elif a == 20:
