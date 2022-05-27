@@ -370,13 +370,14 @@ class Graph:
     
     def percentile_90(self):
         distances = list(self.distances_500()[1])
-
-        dsts = []
-        for i in range(len(distances[0])):
-            for j in range(i + 1, len(distances[0])):
-                dsts.append(distances[i][j])
-        dsts.sort()
-        perc = dsts[int(len(dsts) * 0.9)]
+        #
+        # dsts = []
+        # for i in range(len(distances[0])):
+        #     for j in range(i + 1, len(distances[0])):
+        #         dsts.append(distances[i][j])
+        # dsts.sort()
+        # perc = dsts[int(len(dsts) * 0.9)]
+        perc = distances[int(len(distances) * 0.9)]
         return perc
 
     def remove_x_perc(self, x):
