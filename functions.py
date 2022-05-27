@@ -5,7 +5,7 @@ import random
 
 class Graph:
     def __init__(self, graph):
-        self.g = graph.adj
+        self.g = nx.to_dict_of_dicts(graph)
         self.nodes = list(nx.nodes(graph))
         self.edges = list(nx.edges(graph))
 
@@ -21,6 +21,11 @@ class Graph:
         if node2 not in self.nodes:
             self.nodes.append(node2)
         self.edges.append([node1, node2])
+        if node1 not in self.g:
+            self.g[node1] = {}
+        if node2 not in self.g:
+            self.g[node2] = {}
+        self.g[node1][node2] = {}
 
     def remove_node(self, node):
         i = 0
@@ -30,6 +35,10 @@ class Graph:
             else:
                 i += 1
         self.nodes.remove(node)
+        self.g.pop(node)
+        for i in self.g.items():
+            if node in i[1]:
+                i[1].pop(node)
 
     def density(self):
         v = self.count_nodes()
@@ -38,25 +47,9 @@ class Graph:
 
     def neighbors(self, node):
         return list(self.g[node])
-        # n = []
-        # for edge in self.edges:
-        #     if edge[0] == node:
-        #         n.append(edge[1])
-        #     elif edge[1] == node:
-        #         n.append(edge[0])
-        # return n
-
-    def di_neighbors(self, node):
-        # return list(self.g[node])
-        n = []
-        for edge in self.edges:
-            if edge[0] == node:
-                n.append(edge[1])
-        return n
 
     def has_edge(self, u, v):
-        return v in list(self.g[u])
-        # return v in self.neighbors(u)
+        return v in self.neighbors(u)
 
     def degree(self, node):
         neighbors = self.neighbors(node)
@@ -136,14 +129,9 @@ class Graph:
         # for u in self.nodes:
         #     neighbors_u = self.neighbors(u)
         #     for v in neighbors_u:
-        #         if v != u:
-        #             neighbors_v = self.neighbors(v)
-        #             S = self.intersection(neighbors_u, neighbors_v)
-        #             if u in S:
-        #                 S.remove(u)
-        #             if v in S:
-        #                 S.remove(v)
-        #             t += len(S)
+        #         neighbors_v = self.neighbors(v)
+        #         S = self.intersection(neighbors_u, neighbors_v)
+        #         t += len(S)
         # return t // 6
         t = 0
         for edge in self.edges:
@@ -159,51 +147,45 @@ class Graph:
                 t += len(S)
         return t // 3
 
-    def weak_components(self):
+    def weak_components(self, func):
         visited = set()
-        amount = 0
-
-        for node in self.nodes:
-            if node not in visited:
-                amount += 1
-                visited.add(node)
-                comp = [node]
-                while comp:
-                    v = comp.pop()
-                    for neighbour in self.neighbors(v):
-                        if neighbour not in visited:
-                            visited.add(neighbour)
-                            comp.append(neighbour)
-        return amount
-
-    def max_weakly_comp(self):
-        visited = set()
-        max_comp = []
+        if func == 'amount':
+            amount = 0
+        elif func == 'max_comp':
+            max_comp = []
 
         for node in self.nodes:
             if node not in visited:
                 visited.add(node)
-                curr_comp = [node]
                 nodes_in_check = [node]
-
+                if func == 'amount':
+                    amount += 1
+                elif func == 'max_comp':
+                    curr_comp = [node]
                 while nodes_in_check:
-                    v = nodes_in_check.pop()
+                    v = nodes_in_check.pop(0)
                     for neighbour in self.neighbors(v):
                         if neighbour not in visited:
                             visited.add(neighbour)
                             nodes_in_check.append(neighbour)
-                            curr_comp.append(neighbour)
-
-                if len(curr_comp) > len(max_comp):
+                            if func == 'max_comp':
+                                curr_comp.append(neighbour)
+                if func == 'max_comp' and len(curr_comp) > len(max_comp):
                     max_comp = curr_comp
-        return max_comp
+        if func == 'amount':
+            return amount
+        elif func == 'max_comp':
+            return max_comp
+
+    def number_weakly_components(self):
+        return self.weak_components('amount')
 
     def weakly_comp_with_max_power(self):
-        return len(self.max_weakly_comp()) / self.count_nodes()
+        return self.weak_components('max_comp')
 
     def fill_order(self, node, visited, order):
         visited.add(node)
-        for neighbour in self.di_neighbors(node):
+        for neighbour in self.neighbors(node):
             if neighbour not in visited:
                 self.fill_order(neighbour, visited, order)
         order.append(node)
@@ -211,7 +193,7 @@ class Graph:
     def dfs(self, node, visited, curr_comp):
         visited.add(node)
         curr_comp.append(node)
-        for neighbour in self.di_neighbors(node):
+        for neighbour in self.neighbors(node):
             if neighbour not in visited:
                 self.dfs(neighbour, visited, curr_comp)
 
@@ -221,82 +203,65 @@ class Graph:
             transp.add_edge(edge[1], edge[0])
         return transp
 
-    def strong_components(self):
+    def strong_components(self, func):
         order = []
         visited = set()
+        if func == 'max_comp':
+            max_comp = []
         for node in self.nodes:
             if node not in visited:
                 self.fill_order(node, visited, order)
 
         transposed_graph = self.transpose()
-        visited = set()
-        amount = 0
-        while order:
-            node = order.pop()
-            if node not in visited:
-                transposed_graph.dfs(node, visited, [])
-                amount += 1
-        return amount
 
-    def strongly_comp_with_max_power(self):
-        max_comp = []
-        order = []
-        visited = set()
-        for node in self.nodes:
-            if node not in visited:
-                self.fill_order(node, visited, order)
-
-        transposed_graph = self.transpose()
+        if func == 'amount':
+            amount = 0
+        elif func == 'meta':
+            roots_nodes = dict()
+            roots = []
         visited = set()
         while order:
             node = order.pop()
             curr_comp = []
             if node not in visited:
                 transposed_graph.dfs(node, visited, curr_comp)
-                if len(curr_comp) > len(max_comp):
+                if func == 'amount':
+                    amount += 1
+                elif func == 'max_comp' and len(curr_comp) > len(max_comp):
                     max_comp = curr_comp
+                elif func == 'meta':
+                    root = curr_comp.pop()
+                    roots.append(root)
+                    roots_nodes[root] = root
+                    for v in curr_comp:
+                        roots_nodes[v] = root
+        if func == 'amount':
+            return amount
+        elif func == 'max_comp':
+            return max_comp
+        elif func == 'meta':
+            meta = nx.DiGraph()
+            meta.add_nodes_from(roots)
+            for edge in self.edges:
+                first_root = roots_nodes[edge[0]]
+                second_root = roots_nodes[edge[1]]
+                if first_root != second_root:
+                    meta.add_edge(first_root, second_root)
+            return meta
 
-        return len(max_comp) / self.count_nodes()
+    def number_strongly_components(self):
+        return self.strong_components('amount')
+
+    def strongly_comp_with_max_power(self):
+        return self.strong_components('max_comp')
 
     def meta_graph(self):
-        order = []
-        visited = set()
-        for node in self.nodes:
-            if node not in visited:
-                self.fill_order(node, visited, order)
+        return self.strong_components('meta')
 
-        transposed_graph = self.transpose()
-
-        roots_nodes = dict()
-        roots = []
-
-        visited = set()
-        while order:
-            node = order.pop()
-            comp = []
-            if node not in visited:
-                transposed_graph.dfs(node, visited, comp)
-
-                root = comp.pop()
-                roots.append(root)
-                roots_nodes[root] = root
-                for v in comp:
-                    roots_nodes[v] = root
-
-        meta = nx.DiGraph()
-        meta.add_nodes_from(roots)
-        for edge in self.edges:
-            first_root = roots_nodes[edge[0]]
-            second_root = roots_nodes[edge[1]]
-            if first_root != second_root:
-                meta.add_edge(first_root, second_root)
-        nx.draw_networkx(meta)
-        plt.show()
-
-    def distances_500(self):
-        component = self.max_weakly_comp()
-        if len(component) > 500:
-            sample = random.sample(component, 500)
+    def distances(self, amount=500):
+        component = self.weakly_comp_with_max_power()
+        if len(component) > amount:
+            sample = random.sample(component, amount)
         else:
             sample = component
 
@@ -328,56 +293,25 @@ class Graph:
             for dist in dst_sample:
                 max_dist = max(max_dist, dist)
             eccentricity.add(max_dist)
-        # print(distance)
-        # return list(distance.items())
-        distances_for_perc = sorted(list(distances_for_perc))
         return [eccentricity, distances_for_perc]
 
-        # radius = 999999999
-        # d = -1
-        # for e in eccentricity:
-        #     radius = min(radius, e)
-        #     d = max(d, e)
-
-        # distances_for_perc = sorted(list(distances_for_perc))
-        # perc = distances_for_perc[int(len(distances_for_perc) * 0.9)]
-
-        # return [radius, d, perc]
-
-    # def eccentricity(self, distances):
-        # n = len(distances[0])
-        # eccentricity = [-1] * n
-        # for i in range(n):
-        #     for j in range(n):
-        #         eccentricity[i] = max(eccentricity[i], distances[i][j])
-        # return eccentricity
-
     def radius(self):
-        eccentricity = list(self.distances_500()[0])
-        # eccentricity = self.eccentricity(self.distances_500())
+        eccentricity = list(self.distances()[0])
         radius = eccentricity[0]
         for i in range(len(eccentricity)):
             radius = min(radius, eccentricity[i])
         return radius
 
     def diameter(self):
-        # eccentricity = self.eccentricity(self.distances_500())
-        eccentricity = list(self.distances_500()[0])
+        eccentricity = list(self.distances()[0])
         d = eccentricity[0]
         for i in range(len(eccentricity)):
             d = max(d, eccentricity[i])
         return d
-    
-    def percentile_90(self):
-        distances = list(self.distances_500()[1])
-        #
-        # dsts = []
-        # for i in range(len(distances[0])):
-        #     for j in range(i + 1, len(distances[0])):
-        #         dsts.append(distances[i][j])
-        # dsts.sort()
-        # perc = dsts[int(len(dsts) * 0.9)]
-        perc = distances[int(len(distances) * 0.9)]
+
+    def percentile(self, percent=90):
+        distances = sorted(list(self.distances()[1]))
+        perc = distances[int(len(distances) * percent / 100)]
         return perc
 
     def remove_x_perc(self, x):
@@ -385,18 +319,31 @@ class Graph:
         remove_nodes = random.sample(self.nodes, amount)
         for node in remove_nodes:
             self.remove_node(node)
-            print(node)
-        return self.weakly_comp_with_max_power() / self.count_nodes()
+        return len(self.weakly_comp_with_max_power())
+
+    def degree_quicksort(self, del_nodes, degree):
+        if len(del_nodes) <= 1:
+            return del_nodes
+        else:
+            q = random.choice(del_nodes)
+
+        left, middle, right = (list() for _ in range(3))
+        for n in del_nodes:
+            if degree[n] > degree[q]:
+                left.append(n)
+            if degree[n] < degree[q]:
+                right.append(n)
+            if degree[n] == degree[q]:
+                middle.append(n)
+        return self.degree_quicksort(left, degree) + middle + self.degree_quicksort(right, degree)
 
     def remove_x_perc_max_degree(self, x):
         amount = int(self.count_nodes() * x / 100)
-        degrees = dict()
+        del_nodes = [node for node in self.nodes]
+        degree = dict()
         for node in self.nodes:
-            degrees[node] = self.degree(node)
-        degrees.sort(key=lambda a: a[1], reverse=True)
-        i = 0
-        while amount > i:
-            curr_node = degrees[i][0]
-            self.remove_node(curr_node)
-            i += 1
-        return self.weakly_comp_with_max_power() / self.count_nodes()
+            degree[node] = self.degree(node)
+        del_nodes = self.degree_quicksort(del_nodes, degree)
+        for i in range(amount):
+            self.remove_node(del_nodes[i])
+        return len(self.weakly_comp_with_max_power())
