@@ -112,7 +112,7 @@ elif a == 22:
     else:
         print('Введите название нужного алгоритма (basic/sc):')
         alg_name = str(input())
-        print('Введите количество landmarks (2/5/10):')
+        print('Введите количество landmarks (5/20/50):')
         landmarks_amount = int(input())
         print('Введите способ выбора landmarks (random/degree/coverage):')
         type_name = str(input())
