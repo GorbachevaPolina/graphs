@@ -1,8 +1,16 @@
-import networkx as nx
-from functions import Graph
+from functions import Graph, DiGraph
 
-astro = nx.read_edgelist("CA-AstroPh.txt", create_using=nx.Graph(), nodetype=int)
-astro_graph = Graph(astro)
+
+n = []
+e = []
+with open('CA-AstroPh.txt', 'r') as file:
+    for line in file:
+        if '#' not in line:
+            u, v = line.split()
+            n.append(u)
+            n.append(v)
+            e.append((u, v))
+astro_graph = Graph(n, e)
 
 print('Результаты для графа CA-AstroPh:')
 print('количество вершин: ', len(astro_graph.nodes))
@@ -33,10 +41,18 @@ print('доля вершин в наибольшей компоненте сла
       / len(astro_graph.nodes()))
 print()
 
-google = nx.read_edgelist("web-Google.txt", create_using=nx.Graph(), nodetype=int)
-di_google = nx.read_edgelist("web-Google.txt", create_using=nx.DiGraph(), nodetype=int)
-google_graph = Graph(google)
-di_google_graph = Graph(google)
+
+n = []
+e = []
+with open('web-Google.txt', 'r') as file:
+    for line in file:
+        if '#' not in line:
+            u, v = line.split()
+            n.append(u)
+            n.append(v)
+            e.append((u, v))
+google_graph = Graph(n, e)
+di_google_graph = DiGraph(n, e)
 
 print('Результаты для графа web-Google:')
 print('количество вершин: ', len(google_graph.nodes))
@@ -71,14 +87,21 @@ print('доля вершин в наибольшей компоненте сла
       / len(google_graph.nodes()))
 print()
 
+
+n = []
+e = []
 vk = open('vk.csv', "r")
 next(vk, None)
-G = nx.parse_edgelist(vk, delimiter=',', create_using=nx.Graph(),
-                      nodetype=int, data=(('t', float), ('h', float)))
-vk_graph = Graph(G)
+with vk as file:
+    for line in file:
+        u, v, t, h = line.split(',')
+        n.append(u)
+        n.append(v)
+        e.append((u, v))
+vk_graph = Graph(n, e)
 print('Результаты для графа vk:')
-print('количество вершин: ', len(vk_graph.nodes))
-print('количество ребер: ', len(vk_graph.edges))
+print('количество вершин: ', vk_graph.count_nodes())
+print('количество ребер: ', vk_graph.count_edges())
 print('плотность: ', vk_graph.density())
 print('средний кластерный коэффициент: ', vk_graph.cluster_coef())
 print('глобальный кластерный коэффициент: ', vk_graph.global_coef())
