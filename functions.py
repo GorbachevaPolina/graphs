@@ -103,17 +103,22 @@ class Graph:
             self.edges[v].add(u)
 
     def remove_node(self, node):
-        i = 0
-        while i < self.count_edges():
-            if self.edges[i][0] == node or self.edges[i][1] == node:
-                self.edges.remove(self.edges[i])
-            else:
-                i += 1
+        # i = 0
+        # while i < self.count_edges():
+        #     if self.edges[i][0] == node or self.edges[i][1] == node:
+        #         self.edges.remove(self.edges[i])
+        #     else:
+        #         i += 1
+        # self.nodes.remove(node)
+        # self.g.pop(node)
+        # for i in self.g.items():
+        #     if node in i[1]:
+        #         i[1].pop(node)
         self.nodes.remove(node)
-        self.g.pop(node)
-        for i in self.g.items():
-            if node in i[1]:
-                i[1].pop(node)
+        self.edges.pop(node)
+        for item in self.edges.items():
+            if node in item[1]:
+                item[1].remove(1)
 
     def density(self):
         v = self.count_nodes()
