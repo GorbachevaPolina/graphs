@@ -1,5 +1,6 @@
 import networkx as nx
 from functions import Graph
+import random
 
 test = nx.read_edgelist("test.txt", create_using=nx.Graph(), nodetype=int)
 test_graph = Graph(test)
@@ -26,6 +27,7 @@ print('18. Функция вероятности')
 print('19. Функция вероятности в log-log шкалах')
 print('20. Удалить случайным образом x% узлов')
 print('21. Удалить x% узлов наибольшей степени')
+print('22. Посчитать расстояние между двумя вершинами')
 a = int(input())
 if a == 1:
     print('Количество вершин: ', test_graph.count_nodes())
@@ -87,5 +89,34 @@ elif a == 21:
         print('Доля вершин в наибольшей компоненте слабой связности:', test_graph.remove_x_perc(x))
     else:
         print('Ошибка ввода')
+elif a == 22:
+    print('Введите первую вершину:')
+    node_1 = int(input())
+    print('Введите вторую вершину:')
+    node_2 = int(input())
+
+    if node_1 not in test_graph.nodes or node_2 not in test_graph.nodes:
+        print('Ошибка ввода')
+    else:
+        print('Введите название нужного алгоритма (basic/sc):')
+        alg_name = str(input())
+        print('Введите количество landmarks (2/5/10):')
+        landmarks_amount = int(input())
+        print('Введите способ выбора landmarks (random/degree/coverage):')
+        type_name = str(input())
+        landmarks = []
+        if type_name == 'random':
+            landmarks = random.sample([n for n in test_graph.nodes()], landmarks_amount)
+        elif type_name == 'degree':
+            landmarks = test_graph.select_landmarks_by_degree(landmarks_amount)
+        elif type_name == 'coverage':
+            print('Введите число путей для построения landmarks:')
+            paths_amount = int(input())
+            landmarks = test_graph.select_landmarks_by_coverage(landmarks_amount, paths_amount)
+        distances, trees = test_graph.count_distances(landmarks)
+        if alg_name == 'basic':
+            print(test_graph.landmarks_basic(node_1, node_2, distances))
+        elif alg_name == 'sc':
+            print(test_graph.landmarks_sc(node_1, node_2, trees))
 else:
     print('Ошибка ввода')
