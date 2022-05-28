@@ -2,7 +2,10 @@ import networkx as nx
 from functions import Graph
 import random
 
-test = nx.read_edgelist("test.txt", create_using=nx.Graph(), nodetype=int)
+print('Введите название файла, в котором находится тестовый граф (с расширением):')
+test_file = str(input())
+
+test = nx.read_edgelist(test_file, create_using=nx.Graph(), nodetype=int)
 test_graph = Graph(test)
 
 print('Нажмите номер функции, которую необходимо вызвать:')
