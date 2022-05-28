@@ -21,28 +21,55 @@ def quicksort(nodes, degree):
     return quicksort(left, degree) + middle + quicksort(right, degree)
 
 class Graph:
-    def __init__(self, graph):
-        self.g = nx.to_dict_of_dicts(graph)
-        self.nodes = list(nx.nodes(graph))
-        self.edges = list(nx.edges(graph))
+    def __init__(self, n=None, e=None, type='undirected'):
+        if n is None:
+            self.nodes = set()
+        else:
+            self.nodes = set(n)
+
+        if e is None:
+            self.edges = dict()
+        else:
+            self.edges = dict([(v, set()) for v in self.nodes])
+            for i in e:
+                if i[1] not in self.edges[i[0]]:
+                    self.edges[i[0]].add(i[1])
+                    self.edges[i[1]].add(i[0])
 
     def count_nodes(self):
         return len(self.nodes)
 
     def count_edges(self):
-        return len(self.edges)
+        return len(self.edges_list())
 
-    def add_edge(self, node1, node2):
-        if node1 not in self.nodes:
-            self.nodes.append(node1)
-        if node2 not in self.nodes:
-            self.nodes.append(node2)
-        self.edges.append([node1, node2])
-        if node1 not in self.g:
-            self.g[node1] = {}
-        if node2 not in self.g:
-            self.g[node2] = {}
-        self.g[node1][node2] = {}
+    def edges_list(self):
+        edges = set()
+        for v in self.edges.keys():
+            for u in self.edges[v]:
+                if (v, u) not in edges:
+                    edges.add((u, v))
+        return edges
+
+    def add_edge(self, u, v):
+        # if node1 not in self.nodes:
+        #     self.nodes.append(node1)
+        # if node2 not in self.nodes:
+        #     self.nodes.append(node2)
+        # self.edges.append([node1, node2])
+        # if node1 not in self.g:
+        #     self.g[node1] = {}
+        # if node2 not in self.g:
+        #     self.g[node2] = {}
+        # self.g[node1][node2] = {}
+        if u not in self.nodes:
+            self.nodes.add(u)
+            self.edges[u] = set()
+        if v not in self.nodes:
+            self.nodes.add(v)
+            self.edges[v] = set()
+        if v not in self.edges[u]:
+            self.edges[u].add(v)
+            self.edges[v].add(u)
 
     def remove_node(self, node):
         i = 0
@@ -63,7 +90,7 @@ class Graph:
         return e / ((v*(v-1))/2)
 
     def neighbors(self, node):
-        return list(self.g[node])
+        return self.edges[node]
 
     def has_edge(self, u, v):
         return v in self.neighbors(u)
@@ -120,12 +147,12 @@ class Graph:
 
     def show_probability_function(self):
         res = self.probability()
-        plt.plot([row[0] for row in res], [row[1] for row in res])
+        plt.plot([row[0] for row in res], [row[1] for row in res], 'bs')
         plt.show()
 
     def show_log(self):
         res = self.probability()
-        plt.loglog([row[0] for row in res], [row[1] for row in res])
+        plt.loglog([row[0] for row in res], [row[1] for row in res], 'bs')
         plt.show()
 
     @staticmethod
@@ -134,7 +161,7 @@ class Graph:
 
     def triangles(self):
         t = 0
-        for edge in self.edges:
+        for edge in self.edges_list():
             if edge[0] != edge[1]:
                 neighbors_u = self.neighbors(edge[0])
                 neighbors_v = self.neighbors(edge[1])
