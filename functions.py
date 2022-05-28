@@ -1,7 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import random
-from collections import defaultdict
 
 def quicksort(nodes, degree):
     if len(nodes) <= 1:
@@ -208,7 +207,7 @@ class Graph:
                 t += len(S)
         return t // 3
 
-    def weak_components(self, ):
+    def weak_components(self):
         visited = set()
         amount = 0
         max_comp = []
@@ -455,12 +454,10 @@ class Graph:
             path_to_s = self.find_path(s, tree)
             path_to_t = self.find_path(t, tree)
 
-            if len(path_to_s) == 1 or len(path_to_t) == 1:
-                continue
-            path_to_s.pop(), path_to_t.pop()
+            if len(path_to_s) == 1 or len(path_to_t) == 1: continue
+            path_to_s.pop(); path_to_t.pop()
 
             path_len = len(path_to_s) + len(path_to_t)
-
             if path_len < distance:
                 distance = path_len
 
@@ -472,8 +469,7 @@ class Graph:
                     if self.has_edge(v, w) and v_index + w_index + 1 < distance:
                         distance = v_index + w_index + 1
 
-        if distance == 0: return 1e9
-        else: return distance
+        return distance
 
     def bfs_for_pair(self, node, target):
         tree = dict()
@@ -499,15 +495,17 @@ class Graph:
 
     def select_landmarks_by_coverage(self, amount, pairs_amount):
         pairs = set()
-        paths = defaultdict(dict)
+        paths = dict([(v, set()) for v in range(pairs_amount)])
         landmarks = []
 
         for i in range(pairs_amount):
             while True:
                 [node_1, node_2] = random.sample(self.nodes, 2)
+                hash1 = str(node_1) + '_' + str(node_2)
+                hash2 = str(node_2) + '_' + str(node_1)
 
-                if str(node_1) + ' ' + str(node_2) not in pairs and str(node_2) + ' ' + str(node_1) not in pairs:
-                    pairs.add(str(node_1) + ' ' + str(node_2))
+                if hash1 not in pairs and hash2 not in pairs and node_1 != node_2:
+                    pairs.add(hash1)
 
                     tree = self.bfs_for_pair(node_1, node_2)
                     path = set(self.find_path(node_2, tree))
@@ -517,24 +515,26 @@ class Graph:
                     break
 
         while amount > 0:
-            vertex_count = defaultdict(lambda: 0)
+            vertex_count = dict()
 
             for path in paths.values():
                 for node in path:
-                    vertex_count[node] += 1
+                    if node not in vertex_count.keys():
+                        vertex_count[node] = 0
+                    else:
+                        vertex_count[node] += 1
 
-            max = -1
-            max_node = -1
+            max_coverage = -1; max_node = -1
             for n in vertex_count.keys():
-                if vertex_count[n] > max:
-                    max = vertex_count[n]
+                current_coverage = vertex_count[n]
+                if current_coverage > max_coverage:
+                    max_coverage = current_coverage
                     max_node = n
 
             new_paths = dict()
             for n in paths.keys():
                 if max_node not in paths[n]:
                     new_paths[n] = paths[n]
-
             paths = new_paths
 
             if max_node == -1: break
