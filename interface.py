@@ -1,12 +1,26 @@
-import networkx as nx
-from functions import Graph
+from functions import Graph, DiGraph
 import random
+
+
+def import_graph(name):
+    graph = open(name, "r")
+    n = []
+    e = []
+    with graph as file:
+        for line in file:
+            if '#' not in line:
+                u, v = line.split()
+                n.append(u)
+                n.append(v)
+                e.append((u, v))
+    return n, e
+
 
 print('Введите название файла, в котором находится тестовый граф (с расширением):')
 test_file = str(input())
 
-test = nx.read_edgelist(test_file, create_using=nx.Graph(), nodetype=int)
-test_graph = Graph(test)
+n, e = import_graph(test_file)
+test_graph = Graph(n, e)
 
 print('Нажмите номер функции, которую необходимо вызвать:')
 print('1. Число вершин')
@@ -45,15 +59,13 @@ elif a == 5:
           len(test_graph.weakly_comp_with_max_power()))
 elif a == 6:
     if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
-        di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
-        di_test_graph = Graph(di_test)
+        di_test_graph = DiGraph(n, e)
         print('Количество компонент сильной связности: ', di_test_graph.number_strongly_components())
     else:
         print('Граф неориентированный')
 elif a == 7:
     if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
-        di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
-        di_test_graph = Graph(di_test)
+        di_test_graph = DiGraph(n, e)
         print('Количество вершин в наибольшей компоненте сильной связности: ',
               len(test_graph.strongly_comp_with_max_power()))
     else:
@@ -66,8 +78,7 @@ elif a == 10:
     print('90 процентиль расстояния наибольшей компоненты слабой связности: ', test_graph.percentile())
 elif a == 11:
     if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
-        di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
-        di_test_graph = Graph(di_test)
+        di_test_graph = DiGraph(n, e)
         print('Мета граф: ', di_test_graph.meta_graph())
     else:
         print('Граф неориентированный')
