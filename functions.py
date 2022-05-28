@@ -345,7 +345,7 @@ class Graph:
 
         # n = len(component)
         eccentricity = set()
-        distances_for_perc = set()
+        distances_for_perc = []
 
         for node in sample:
             distance = dict()
@@ -366,29 +366,34 @@ class Graph:
                         distance[neighbour] = distance[v] + 1
                         if neighbour in sample:
                             dst_sample.add(distance[neighbour])
-                            distances_for_perc.add(distance[neighbour])
-            max_dist = 0
-            for dist in dst_sample:
-                max_dist = max(max_dist, dist)
+                            distances_for_perc.append(distance[neighbour])
+            # max_dist = 0
+            # for dist in dst_sample:
+            #     max_dist = max(max_dist, dist)
+            max_dist = max(dst_sample)
             eccentricity.add(max_dist)
         return [eccentricity, distances_for_perc]
 
     def radius(self):
         eccentricity = list(self.distances()[0])
-        radius = eccentricity[0]
-        for i in range(len(eccentricity)):
-            radius = min(radius, eccentricity[i])
-        return radius
+        # radius = eccentricity[0]
+        # for i in range(len(eccentricity)):
+        #     radius = min(radius, eccentricity[i])
+        # print(min(eccentricity))
+        # return radius
+        return min(eccentricity)
 
     def diameter(self):
         eccentricity = list(self.distances()[0])
-        d = eccentricity[0]
-        for i in range(len(eccentricity)):
-            d = max(d, eccentricity[i])
-        return d
+        # d = eccentricity[0]
+        # for i in range(len(eccentricity)):
+        #     d = max(d, eccentricity[i])
+        # return d
+        return max(eccentricity)
 
     def percentile(self, percent=90):
         distances = sorted(list(self.distances()[1]))
+        # print(distances)
         perc = distances[int(len(distances) * percent / 100)]
         return perc
 
