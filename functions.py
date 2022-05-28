@@ -206,41 +206,33 @@ class Graph:
                 t += len(S)
         return t // 3
 
-    def weak_components(self, func):
+    def weak_components(self, ):
         visited = set()
-        if func == 'amount':
-            amount = 0
-        elif func == 'max_comp':
-            max_comp = []
+        amount = 0
+        max_comp = []
 
         for node in self.nodes:
             if node not in visited:
                 visited.add(node)
                 nodes_in_check = [node]
-                if func == 'amount':
-                    amount += 1
-                elif func == 'max_comp':
-                    curr_comp = [node]
+                amount += 1
+                curr_comp = [node]
                 while nodes_in_check:
                     v = nodes_in_check.pop(0)
                     for neighbour in self.neighbors(v):
                         if neighbour not in visited:
                             visited.add(neighbour)
                             nodes_in_check.append(neighbour)
-                            if func == 'max_comp':
-                                curr_comp.append(neighbour)
-                if func == 'max_comp' and len(curr_comp) > len(max_comp):
+                            curr_comp.append(neighbour)
+                if len(curr_comp) > len(max_comp):
                     max_comp = curr_comp
-        if func == 'amount':
-            return amount
-        elif func == 'max_comp':
-            return max_comp
+        return amount, max_comp
 
     def number_weakly_components(self):
-        return self.weak_components('amount')
+        return self.weak_components()[0]
 
     def weakly_comp_with_max_power(self):
-        return self.weak_components('max_comp')
+        return self.weak_components()[1]
 
     def fill_order(self, node, visited, order):
         visited.add(node)
