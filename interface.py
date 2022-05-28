@@ -44,14 +44,20 @@ elif a == 5:
     print('Количество вершин в наибольшей компоненте слабой связности: ',
           len(test_graph.weakly_comp_with_max_power()))
 elif a == 6:
-    di_test = nx.read_edgelist("test.txt", create_using=nx.DiGraph(), nodetype=int)
-    di_test_graph = Graph(di_test)
-    print('Количество компонент сильной связности: ', di_test_graph.number_strongly_components())
+    if test_file !== 'email-Eu-core.txt' and test_file !== 'soc-wiki-Vote.txt':
+        di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
+        di_test_graph = Graph(di_test)
+        print('Количество компонент сильной связности: ', di_test_graph.number_strongly_components())
+    else:
+        print('Граф неориентированный')
 elif a == 7:
-    di_test = nx.read_edgelist("test.txt", create_using=nx.DiGraph(), nodetype=int)
-    di_test_graph = Graph(di_test)
-    print('Количество вершин в наибольшей компоненте сильной связности: ',
-          len(test_graph.strongly_comp_with_max_power()))
+    if test_file !== 'email-Eu-core.txt' and test_file !== 'soc-wiki-Vote.txt':
+        di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
+        di_test_graph = Graph(di_test)
+        print('Количество вершин в наибольшей компоненте сильной связности: ',
+              len(test_graph.strongly_comp_with_max_power()))
+    else:
+        print('Граф неориентированный')
 elif a == 8:
     print('Оценка радиуса наибольшей компоненты слабой связности: ', test_graph.radius())
 elif a == 9:
@@ -59,9 +65,12 @@ elif a == 9:
 elif a == 10:
     print('90 процентиль расстояния наибольшей компоненты слабой связности: ', test_graph.percentile())
 elif a == 11:
-    di_test = nx.read_edgelist("test.txt", create_using=nx.DiGraph(), nodetype=int)
-    di_test_graph = Graph(di_test)
-    print('Мета граф: ', di_test_graph.meta_graph())
+    if test_file !== 'email-Eu-core.txt' and test_file !== 'soc-wiki-Vote.txt':
+        di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
+        di_test_graph = Graph(di_test)
+        print('Мета граф: ', di_test_graph.meta_graph())
+    else:
+        print('Граф неориентированный')
 elif a == 12:
     print('Количество треугольников:', test_graph.triangles())
 elif a == 13:
@@ -109,7 +118,7 @@ elif a == 22:
         type_name = str(input())
         landmarks = []
         if type_name == 'random':
-            landmarks = random.sample([n for n in test_graph.nodes()], landmarks_amount)
+            landmarks = random.sample([n for n in test_graph.nodes], landmarks_amount)
         elif type_name == 'degree':
             landmarks = test_graph.select_landmarks_by_degree(landmarks_amount)
         elif type_name == 'coverage':

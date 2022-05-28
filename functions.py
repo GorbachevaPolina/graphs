@@ -123,15 +123,6 @@ class Graph:
         plt.plot([row[0] for row in res], [row[1] for row in res])
         plt.show()
 
-    # def show_hist(self):
-    #     res = self.probability()
-    #     plt.hist([row[0] for row in res],
-    #              histtype='step',
-    #              cumulative=True,
-    #              bins=len([row[0] for row in res]),
-    #              weights=[row[1] for row in res])
-    #     plt.show()
-
     def show_log(self):
         res = self.probability()
         plt.loglog([row[0] for row in res], [row[1] for row in res])
@@ -142,24 +133,12 @@ class Graph:
         return list(set(n_u) & set(n_v))
 
     def triangles(self):
-        # t = 0
-        # for u in self.nodes:
-        #     neighbors_u = self.neighbors(u)
-        #     for v in neighbors_u:
-        #         neighbors_v = self.neighbors(v)
-        #         S = self.intersection(neighbors_u, neighbors_v)
-        #         t += len(S)
-        # return t // 6
         t = 0
         for edge in self.edges:
             if edge[0] != edge[1]:
                 neighbors_u = self.neighbors(edge[0])
                 neighbors_v = self.neighbors(edge[1])
                 S = self.intersection(neighbors_u, neighbors_v)
-                # if edge[0] in S:
-                #     S.remove(edge[0])
-                # if edge[1] in S:
-                #     S.remove(edge[1])
                 S = [x for x in S if x != edge[0] and x != edge[1]]
                 t += len(S)
         return t // 3
