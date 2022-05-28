@@ -317,29 +317,13 @@ class Graph:
             self.remove_node(node)
         return len(self.weakly_comp_with_max_power())
 
-    def degree_quicksort(self, del_nodes, degree):
-        if len(del_nodes) <= 1:
-            return del_nodes
-        else:
-            q = random.choice(del_nodes)
-
-        left, middle, right = (list() for _ in range(3))
-        for n in del_nodes:
-            if degree[n] > degree[q]:
-                left.append(n)
-            if degree[n] < degree[q]:
-                right.append(n)
-            if degree[n] == degree[q]:
-                middle.append(n)
-        return self.degree_quicksort(left, degree) + middle + self.degree_quicksort(right, degree)
-
     def remove_x_perc_max_degree(self, x):
         amount = int(self.count_nodes() * x / 100)
         del_nodes = [node for node in self.nodes]
         degree = dict()
         for node in self.nodes:
             degree[node] = self.degree(node)
-        del_nodes = self.degree_quicksort(del_nodes, degree)
+        del_nodes = quicksort(del_nodes, degree)
         for i in range(amount):
             self.remove_node(del_nodes[i])
         return len(self.weakly_comp_with_max_power())
