@@ -20,8 +20,39 @@ def quicksort(nodes, degree):
 
     return quicksort(left, degree) + middle + quicksort(right, degree)
 
+
+class DiGraph:
+    def __init__(self, n=None, e=None):
+        if n is None:
+            self.nodes = set()
+        else:
+            self.nodes = set(n)
+
+        if e is None:
+            self.edges = dict()
+        else:
+            self.edges = dict([(v, set()) for v in self.nodes])
+            for i in e:
+                if i[1] not in self.edges[i[0]]:
+                    self.edges[i[0]].add(i[1])
+
+    def count_nodes(self):
+        return len(self.nodes)
+
+    def count_edges(self):
+        return len(self.edges_list())
+
+    def edges_list(self):
+        edges = set()
+        for v in self.edges.keys():
+            for u in self.edges[v]:
+                edges.add((u, v))
+        return edges
+
+
+
 class Graph:
-    def __init__(self, n=None, e=None, type='undirected'):
+    def __init__(self, n=None, e=None):
         if n is None:
             self.nodes = set()
         else:
