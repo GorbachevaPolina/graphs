@@ -1,7 +1,24 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import random
+from collections import defaultdict
 
+def quicksort(nodes, degree):
+    if len(nodes) <= 1:
+        return nodes
+    else:
+        q = random.choice(nodes)
+
+    left, middle, right = (list() for _ in range(3))
+    for n in nodes:
+        if degree[n] > degree[q]:
+            left.append(n)
+        if degree[n] < degree[q]:
+            right.append(n)
+        if degree[n] == degree[q]:
+            middle.append(n)
+
+    return quicksort(left, degree) + middle + quicksort(right, degree)
 
 class Graph:
     def __init__(self, graph):
@@ -347,3 +364,163 @@ class Graph:
         for i in range(amount):
             self.remove_node(del_nodes[i])
         return len(self.weakly_comp_with_max_power())
+
+    def select_landmarks_by_degree(self, amount):
+        nodes = [node for node in self.nodes]
+        degree = dict()
+        for node in self.nodes:
+            degree[node] = self.degree(node)
+
+        return quicksort(nodes, degree)[:amount]
+
+    def bfs(self, node):
+        distance = dict()
+        tree = dict()
+        queue = []
+        visited = set()
+        distance[node] = 0
+        visited.add(node)
+        queue.append(node)
+
+        while queue:
+            s = queue.pop(0)
+
+            for neighbour in self.neighbors(s):
+                if neighbour not in visited:
+                    distance[neighbour] = distance[s] + 1
+                    tree[neighbour] = s
+                    visited.add(neighbour)
+                    queue.append(neighbour)
+
+        return distance, tree
+
+    def count_distances(self, landmarks):
+        distances = dict()
+        trees = dict()
+
+        for landmark in landmarks:
+            distances[landmark], trees[landmark] = self.bfs(landmark)
+
+        return distances, trees
+
+    @staticmethod
+    def landmarks_basic(s, t, distances):
+        distance = 1e9
+
+        for landmark in distances.keys():
+            list = distances[landmark]
+
+            if s in list and t in list:
+                current_distance = list[s] + list[t]
+                if current_distance < distance:
+                    distance = current_distance
+
+        return distance
+
+    @staticmethod
+    def find_path(node, tree):
+        path = []
+
+        while True:
+            path.append(node)
+            if node in tree:
+                node = tree[node]
+            else: break
+
+        return path
+
+    def landmarks_sc(self, s, t, trees):
+        distance = 1e9
+
+        for landmark in trees.keys():
+            tree = trees[landmark]
+            path_to_s = self.find_path(s, tree)
+            path_to_t = self.find_path(t, tree)
+
+            if len(path_to_s) == 1 or len(path_to_t) == 1:
+                continue
+            path_to_s.pop(), path_to_t.pop()
+
+            path_len = len(path_to_s) + len(path_to_t)
+
+            if path_len < distance:
+                distance = path_len
+
+            for v in path_to_s:
+                for w in path_to_t:
+                    v_index = path_to_s.index(v)
+                    w_index = path_to_t.index(w)
+
+                    if self.has_edge(v, w) and v_index + w_index + 1 < distance:
+                        distance = v_index + w_index + 1
+
+        if distance == 0: return 1e9
+        else: return distance
+
+    def bfs_for_pair(self, node, target):
+        tree = dict()
+        queue = []
+        visited = set()
+        visited.add(node)
+        queue.append(node)
+
+        while queue:
+            s = queue.pop(0)
+
+            for neighbour in self.neighbors(s):
+                if neighbour not in visited:
+                    tree[neighbour] = s
+                    visited.add(neighbour)
+                    queue.append(neighbour)
+
+                    if neighbour == target:
+                        queue = []
+                        break
+
+        return tree
+
+    def select_landmarks_by_coverage(self, amount, pairs_amount):
+        pairs = set()
+        paths = defaultdict(dict)
+        landmarks = []
+
+        for i in range(pairs_amount):
+            while True:
+                [node_1, node_2] = random.sample(self.nodes, 2)
+
+                if str(node_1) + ' ' + str(node_2) not in pairs and str(node_2) + ' ' + str(node_1) not in pairs:
+                    pairs.add(str(node_1) + ' ' + str(node_2))
+
+                    tree = self.bfs_for_pair(node_1, node_2)
+                    path = set(self.find_path(node_2, tree))
+
+                    if len(path) == 1: continue
+                    paths[i] = path
+                    break
+
+        while amount > 0:
+            vertex_count = defaultdict(lambda: 0)
+
+            for path in paths.values():
+                for node in path:
+                    vertex_count[node] += 1
+
+            max = -1
+            max_node = -1
+            for n in vertex_count.keys():
+                if vertex_count[n] > max:
+                    max = vertex_count[n]
+                    max_node = n
+
+            new_paths = dict()
+            for n in paths.keys():
+                if max_node not in paths[n]:
+                    new_paths[n] = paths[n]
+
+            paths = new_paths
+
+            if max_node == -1: break
+            landmarks.append(max_node)
+            amount -= 1
+
+        return landmarks
