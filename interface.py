@@ -44,14 +44,14 @@ elif a == 5:
     print('Количество вершин в наибольшей компоненте слабой связности: ',
           len(test_graph.weakly_comp_with_max_power()))
 elif a == 6:
-    if test_file != 'email-Eu-core.txt' and test_file != 'soc-wiki-Vote.txt':
+    if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
         di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
         di_test_graph = Graph(di_test)
         print('Количество компонент сильной связности: ', di_test_graph.number_strongly_components())
     else:
         print('Граф неориентированный')
 elif a == 7:
-    if test_file != 'email-Eu-core.txt' and test_file != 'soc-wiki-Vote.txt':
+    if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
         di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
         di_test_graph = Graph(di_test)
         print('Количество вершин в наибольшей компоненте сильной связности: ',
@@ -65,7 +65,7 @@ elif a == 9:
 elif a == 10:
     print('90 процентиль расстояния наибольшей компоненты слабой связности: ', test_graph.percentile())
 elif a == 11:
-    if test_file != 'email-Eu-core.txt' and test_file != 'soc-wiki-Vote.txt':
+    if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
         di_test = nx.read_edgelist(test_file, create_using=nx.DiGraph(), nodetype=int)
         di_test_graph = Graph(di_test)
         print('Мета граф: ', di_test_graph.meta_graph())
