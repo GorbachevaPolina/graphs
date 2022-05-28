@@ -50,7 +50,6 @@ class DiGraph:
         return edges
 
 
-
 class Graph:
     def __init__(self, n=None, e=None):
         if n is None:
@@ -71,15 +70,15 @@ class Graph:
         return len(self.nodes)
 
     def count_edges(self):
-        return len(self.edges_list())
+        return sum([self.degree(node) for node in self.nodes]) // 2
 
-    def edges_list(self):
-        edges = set()
-        for v in self.edges.keys():
-            for u in self.edges[v]:
-                if (v, u) not in edges:
-                    edges.add((u, v))
-        return edges
+    # def edges_list(self):
+    #     edges = set()
+    #     for v in self.edges.keys():
+    #         for u in self.edges[v]:
+    #             if (v, u) not in edges:
+    #                 edges.add((u, v))
+    #     return edges
 
     def add_edge(self, u, v):
         # if node1 not in self.nodes:
@@ -118,7 +117,7 @@ class Graph:
         self.edges.pop(node)
         for item in self.edges.items():
             if node in item[1]:
-                item[1].remove(1)
+                item[1].remove(node)
 
     def density(self):
         v = self.count_nodes()
@@ -133,7 +132,10 @@ class Graph:
 
     def degree(self, node):
         neighbors = self.neighbors(node)
-        return len(neighbors)
+        res = len(neighbors)
+        if node in neighbors:
+            res += 1
+        return res
 
     def local_coef(self, node):
         neighbours = [n for n in self.neighbors(node)]
@@ -254,60 +256,58 @@ class Graph:
             transp.add_edge(edge[1], edge[0])
         return transp
 
-    def strong_components(self, func):
+    def strong_components(self):
         order = []
         visited = set()
-        if func == 'max_comp':
-            max_comp = []
+        max_comp = []
         for node in self.nodes:
             if node not in visited:
                 self.fill_order(node, visited, order)
 
         transposed_graph = self.transpose()
 
-        if func == 'amount':
-            amount = 0
-        elif func == 'meta':
-            roots_nodes = dict()
-            roots = []
+        amount = 0
+        roots_nodes = dict()
+        roots = []
         visited = set()
         while order:
             node = order.pop()
             curr_comp = []
             if node not in visited:
                 transposed_graph.dfs(node, visited, curr_comp)
-                if func == 'amount':
-                    amount += 1
-                elif func == 'max_comp' and len(curr_comp) > len(max_comp):
+                amount += 1
+                if len(curr_comp) > len(max_comp):
                     max_comp = curr_comp
-                elif func == 'meta':
-                    root = curr_comp.pop()
-                    roots.append(root)
-                    roots_nodes[root] = root
-                    for v in curr_comp:
-                        roots_nodes[v] = root
-        if func == 'amount':
-            return amount
-        elif func == 'max_comp':
-            return max_comp
-        elif func == 'meta':
-            meta = nx.DiGraph()
-            meta.add_nodes_from(roots)
-            for edge in self.edges:
-                first_root = roots_nodes[edge[0]]
-                second_root = roots_nodes[edge[1]]
-                if first_root != second_root:
-                    meta.add_edge(first_root, second_root)
-            return meta
+                root = curr_comp.pop()
+                roots.append(root)
+                roots_nodes[root] = root
+                for v in curr_comp:
+                    roots_nodes[v] = root
+        # if func == 'amount':
+        #     return amount
+        # elif func == 'max_comp':
+        #     return max_comp
+        # elif func == 'meta':
+        #     meta = nx.DiGraph()
+        #     meta.add_nodes_from(roots)
+        #     for edge in self.edges:
+        #         first_root = roots_nodes[edge[0]]
+        #         second_root = roots_nodes[edge[1]]
+        #         if first_root != second_root:
+        #             meta.add_edge(first_root, second_root)
+        #     return meta
+        return amount, max_comp, roots, roots_nodes
 
     def number_strongly_components(self):
-        return self.strong_components('amount')
+        return self.strong_components()[0]
 
     def strongly_comp_with_max_power(self):
-        return self.strong_components('max_comp')
+        return self.strong_components()[1]
 
     def meta_graph(self):
-        return self.strong_components('meta')
+        roots, roots_nodes = self.strong_components()[2], self.strong_components()[3]
+        meta = DiGraph(roots, roots_nodes)
+        return meta
 
     def distances(self, amount=500):
         component = self.weakly_comp_with_max_power()
@@ -316,7 +316,7 @@ class Graph:
         else:
             sample = component
 
-        n = len(component)
+        # n = len(component)
         eccentricity = set()
         distances_for_perc = set()
 
