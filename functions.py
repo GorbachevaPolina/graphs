@@ -1,4 +1,3 @@
-import networkx as nx
 import matplotlib.pyplot as plt
 import random
 from collections import defaultdict
@@ -174,6 +173,13 @@ class Graph:
     #             if (v, u) not in edges:
     #                 edges.add((u, v))
     #     return edges
+
+    def edges_list(self):
+        edges = set()
+        for v in self.edges.keys():
+            for u in self.edges[v]:
+                edges.add((v, u))
+        return edges
 
     def add_edge(self, u, v):
         # if node1 not in self.nodes:
