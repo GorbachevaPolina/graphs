@@ -4,20 +4,20 @@ import random
 
 def import_graph(name):
     graph = open(name, "r")
-    n = []
+    n = set()
     e = []
     with graph as file:
         for line in file:
             if '#' not in line:
                 u, v = line.split()
-                n.append(u)
-                n.append(v)
+                n.add(u)
+                n.add(v)
                 e.append((u, v))
     return n, e
 
 
 print('Введите название файла, в котором находится тестовый граф (с расширением):')
-test_file = str(input())
+test_file = input()
 
 n, e = import_graph(test_file)
 test_graph = Graph(n, e)
@@ -27,9 +27,9 @@ print('1. Число вершин')
 print('2. Число ребер')
 print('3. Плотность')
 print('4. Число  компонент  слабой связности')
-print('5. Количество вершин в наибольшей компоненте слабой связности')
+print('5. Доля вершин в наибольшей компоненте слабой связности')
 print('6. Число  компонент  сильной связности')
-print('7. Количество вершин в наибольшей компоненте сильной связности')
+print('7. Доля вершин в наибольшей компоненте сильной связности')
 print('8. Оценка радиуса')
 print('9. Оценка диаметра')
 print('10. Оценка 90 процентиля')
@@ -55,8 +55,7 @@ elif a == 3:
 elif a == 4:
     print('Количество компонент слабой связности: ', test_graph.number_weakly_components())
 elif a == 5:
-    print('Количество вершин в наибольшей компоненте слабой связности: ',
-          len(test_graph.weakly_comp_with_max_power()))
+    print('Доля вершин в наибольшей компоненте слабой связности: ', test_graph.nodes_in_weakly_comp_with_max_power())
 elif a == 6:
     if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
         di_test_graph = DiGraph(n, e)
@@ -66,8 +65,7 @@ elif a == 6:
 elif a == 7:
     if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
         di_test_graph = DiGraph(n, e)
-        print('Количество вершин в наибольшей компоненте сильной связности: ',
-              len(test_graph.strongly_comp_with_max_power()))
+        print('Доля вершин в наибольшей компоненте сильной связности: ', di_test_graph.nodes_in_strongly_comp_with_max_power())
     else:
         print('Граф неориентированный')
 elif a == 8:
@@ -79,7 +77,8 @@ elif a == 10:
 elif a == 11:
     if test_file == 'email-Eu-core.txt' or test_file == 'soc-wiki-Vote.txt':
         di_test_graph = DiGraph(n, e)
-        print('Мета граф: ', di_test_graph.meta_graph())
+        meta = di_test_graph.meta_graph()
+        print('Мета граф: число вершин - ', meta.count_nodes(), ', число ребер - ', meta.count_edges())
     else:
         print('Граф неориентированный')
 elif a == 12:
@@ -109,24 +108,24 @@ elif a == 21:
     print('Введите процент узлов наибольшей степени, которые необходимо удалить из графа:')
     x = int(input())
     if 0 < x < 100:
-        print('Доля вершин в наибольшей компоненте слабой связности:', test_graph.remove_x_perc(x))
+        print('Доля вершин в наибольшей компоненте слабой связности:', test_graph.remove_x_perc_max_degree(x))
     else:
         print('Ошибка ввода')
 elif a == 22:
     print('Введите первую вершину:')
-    node_1 = int(input())
+    node_1 = input()
     print('Введите вторую вершину:')
-    node_2 = int(input())
+    node_2 = input()
 
     if node_1 not in test_graph.nodes or node_2 not in test_graph.nodes:
         print('Ошибка ввода')
     else:
         print('Введите название нужного алгоритма (basic/sc):')
-        alg_name = str(input())
+        alg_name = input()
         print('Введите количество landmarks (5/20/50):')
         landmarks_amount = int(input())
         print('Введите способ выбора landmarks (random/degree/coverage):')
-        type_name = str(input())
+        type_name = input()
         landmarks = []
         if type_name == 'random':
             landmarks = random.sample([n for n in test_graph.nodes], landmarks_amount)

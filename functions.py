@@ -48,20 +48,6 @@ class DiGraph:
         res = len(neighbors)
         return res
 
-    def fill_order(self, node, visited, order):
-        visited.add(node)
-        for neighbour in self.neighbors(node):
-            if neighbour not in visited:
-                self.fill_order(neighbour, visited, order)
-        order.append(node)
-
-    def dfs(self, node, visited, curr_comp):
-        visited.add(node)
-        curr_comp.append(node)
-        for neighbour in self.neighbors(node):
-            if neighbour not in visited:
-                self.dfs(neighbour, visited, curr_comp)
-
     def add_edge(self, u, v):
         if u not in self.nodes:
             self.nodes.add(u)
@@ -79,14 +65,7 @@ class DiGraph:
                 edges.add((v, u))
         return edges
 
-    def transpose(self):
-        transp = DiGraph()
-        for edge in self.edges_list():
-            transp.add_edge(edge[1], edge[0])
-        return transp
-
-
-    def scc3(self):
+    def strong_components(self):
         indexes = dict()
         links = dict()
         visited = set()
@@ -147,14 +126,20 @@ class DiGraph:
         return len(self.strong_components().keys())
 
     def strongly_comp_with_max_power(self):
-        return max(map(len, self.strong_components().values()))
+        # return max(map(len, self.strong_components().values()))
+        max_len = 0
+        max_comp = -1
+        components = self.strong_components()
+        for i in components.keys():
+            if len(components[i]) > max_len:
+                max_len = len(components[i])
+                max_comp = i
+        return components[max_comp]
+
+    def nodes_in_strongly_comp_with_max_power(self):
+        return len(self.strongly_comp_with_max_power()) / self.count_nodes()
 
     def meta_graph(self):
-        # roots, roots_nodes = self.strong_components()[2], self.strong_components()[3]
-        # roots_nodes = list(roots_nodes.items())
-        # print(roots_nodes)
-        # meta = DiGraph(roots, roots_nodes)
-        # return meta
         scc = self.strong_components()
         new_nodes = set(scc.keys())
         new_edges = set()
@@ -183,9 +168,10 @@ class Graph:
         else:
             self.edges = dict([(v, set()) for v in self.nodes])
             for i in e:
-                if i[1] not in self.edges[i[0]]:
-                    self.edges[i[0]].add(i[1])
-                    self.edges[i[1]].add(i[0])
+                # if i[1] not in self.edges[i[0]]:
+                #     self.edges[i[0]].add(i[1])
+                #     self.edges[i[1]].add(i[0])
+                self.add_edge(i[0], i[1])
 
     def count_nodes(self):
         return len(self.nodes)
@@ -197,7 +183,8 @@ class Graph:
         edges = set()
         for v in self.edges.keys():
             for u in self.edges[v]:
-                edges.add((v, u))
+                if (u, v) not in edges:
+                    edges.add((v, u))
         return edges
 
     def add_edge(self, u, v):
@@ -305,35 +292,45 @@ class Graph:
                 S = self.intersection(neighbors_u, neighbors_v)
                 S = [x for x in S if x != edge[0] and x != edge[1]]
                 t += len(S)
-        return t // 6
+        return t // 3
 
     def weak_components(self):
         visited = set()
-        amount = 0
-        max_comp = []
+        counter = 0
+        components = dict()
 
         for node in self.nodes:
             if node not in visited:
                 visited.add(node)
                 nodes_in_check = [node]
-                amount += 1
-                curr_comp = [node]
+                counter += 1
+                components[counter] = {node}
+
                 while nodes_in_check:
                     v = nodes_in_check.pop(0)
                     for neighbour in self.neighbors(v):
                         if neighbour not in visited:
                             visited.add(neighbour)
                             nodes_in_check.append(neighbour)
-                            curr_comp.append(neighbour)
-                if len(curr_comp) > len(max_comp):
-                    max_comp = curr_comp
-        return amount, max_comp
+                            components[counter].add(neighbour)
+        return components
 
     def number_weakly_components(self):
-        return self.weak_components()[0]
+        return len(self.weak_components().keys())
 
     def weakly_comp_with_max_power(self):
-        return self.weak_components()[1]
+        max_len = 0
+        max_comp = -1
+        components = self.weak_components()
+        for i in components.keys():
+            if len(components[i]) > max_len:
+                max_len = len(components[i])
+                max_comp = i
+        # return max(map(len, self.weak_components().values()))
+        return components[max_comp]
+
+    def nodes_in_weakly_comp_with_max_power(self):
+        return len(self.weakly_comp_with_max_power()) / self.count_nodes()
 
     def distances(self, amount=500):
         component = self.weakly_comp_with_max_power()
@@ -343,18 +340,15 @@ class Graph:
             sample = component
 
         eccentricity = set()
-        distances_for_perc = []
+        distances = []
 
         for node in sample:
             distance = dict()
-            nodes_in_check = []
-            visited = set()
-            dst_sample = set()
+            nodes_in_check = [node]
+            visited = {node}
 
             distance[node] = 0
-            visited.add(node)
-            nodes_in_check.append(node)
-
+            max_dist = 0
             while nodes_in_check:
                 v = nodes_in_check.pop(0)
                 for neighbour in self.neighbors(v):
@@ -363,11 +357,10 @@ class Graph:
                         nodes_in_check.append(neighbour)
                         distance[neighbour] = distance[v] + 1
                         if neighbour in sample:
-                            dst_sample.add(distance[neighbour])
-                            distances_for_perc.append(distance[neighbour])
-            max_dist = max(dst_sample)
+                            max_dist = max(max_dist, distance[neighbour])
+                            distances.append(distance[neighbour])
             eccentricity.add(max_dist)
-        return [eccentricity, distances_for_perc]
+        return [eccentricity, distances]
 
     def radius(self):
         eccentricity = list(self.distances()[0])
@@ -387,26 +380,26 @@ class Graph:
         remove_nodes = random.sample(self.nodes, amount)
         for node in remove_nodes:
             self.remove_node(node)
-        return len(self.weakly_comp_with_max_power())
+        return self.nodes_in_weakly_comp_with_max_power() / self.count_nodes()
 
     def remove_x_perc_max_degree(self, x):
         amount = int(self.count_nodes() * x / 100)
-        del_nodes = [node for node in self.nodes]
+        # del_nodes = [node for node in self.nodes]
         degree = dict()
         for node in self.nodes:
             degree[node] = self.degree(node)
-        del_nodes = quicksort(del_nodes, degree)
+        del_nodes = quicksort(list(self.nodes), degree)
         for i in range(amount):
             self.remove_node(del_nodes[i])
-        return len(self.weakly_comp_with_max_power())
+        return self.nodes_in_weakly_comp_with_max_power() / self.count_nodes()
 
     def select_landmarks_by_degree(self, amount):
-        nodes = [node for node in self.nodes]
+        # nodes = [node for node in self.nodes]
         degree = dict()
         for node in self.nodes:
             degree[node] = self.degree(node)
 
-        return quicksort(nodes, degree)[:amount]
+        return quicksort(list(self.nodes), degree)[:amount]
 
     def bfs(self, node):
         distance = dict()
