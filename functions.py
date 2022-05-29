@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import random
 
+
 def quicksort(nodes, degree):
     if len(nodes) <= 1:
         return nodes
@@ -31,8 +32,6 @@ class DiGraph:
         else:
             self.edges = dict([(v, set()) for v in self.nodes])
             for i in e:
-                # if i[1] not in self.edges[i[0]]:
-                #     self.edges[i[0]].add(i[1])
                 self.add_edge(i[0], i[1])
 
     def count_nodes(self):
@@ -72,7 +71,6 @@ class DiGraph:
             self.edges[v] = set()
         if v not in self.edges[u]:
             self.edges[u].add(v)
-            # self.edges[v].add(u)
 
     def edges_list(self):
         edges = set()
@@ -87,59 +85,32 @@ class DiGraph:
             transp.add_edge(edge[1], edge[0])
         return transp
 
-    def strong_components(self):
-        order = []
-        visited = set()
-        max_comp = []
-        for node in self.nodes:
-            if node not in visited:
-                self.fill_order(node, visited, order)
-
-        transposed_graph = self.transpose()
-
-        amount = 0
-        roots_nodes = dict()
-        roots = []
-        visited = set()
-        while order:
-            node = order.pop()
-            curr_comp = []
-            if node not in visited:
-                transposed_graph.dfs(node, visited, curr_comp)
-                amount += 1
-                if len(curr_comp) > len(max_comp):
-                    max_comp = curr_comp
-                root = curr_comp.pop()
-                roots.append(root)
-                roots_nodes[root] = root
-                for v in curr_comp:
-                    roots_nodes[v] = root
-        # if func == 'amount':
-        #     return amount
-        # elif func == 'max_comp':
-        #     return max_comp
-        # elif func == 'meta':
-        #     meta = nx.DiGraph()
-        #     meta.add_nodes_from(roots)
-        #     for edge in self.edges:
-        #         first_root = roots_nodes[edge[0]]
-        #         second_root = roots_nodes[edge[1]]
-        #         if first_root != second_root:
-        #             meta.add_edge(first_root, second_root)
-        #     return meta
-        return amount, max_comp, roots, roots_nodes
 
     def number_strongly_components(self):
-        return self.strong_components()[0]
+        return len(self.strong_components().keys())
 
     def strongly_comp_with_max_power(self):
-        return self.strong_components()[1]
+        return max(map(len, self.strong_components().values()))
 
     def meta_graph(self):
-        roots, roots_nodes = self.strong_components()[2], self.strong_components()[3]
-        roots_nodes = list(roots_nodes.items())
-        print(roots_nodes)
-        meta = DiGraph(roots, roots_nodes)
+        # roots, roots_nodes = self.strong_components()[2], self.strong_components()[3]
+        # roots_nodes = list(roots_nodes.items())
+        # print(roots_nodes)
+        # meta = DiGraph(roots, roots_nodes)
+        # return meta
+        scc = self.strong_components()
+        new_nodes = set(scc.keys())
+        new_edges = set()
+        indexes = dict()
+        for node, values in scc.items():
+            for value in values:
+                indexes[value] = node
+        for edge in self.edges_list():
+            u = indexes[edge[0]]
+            v = indexes[edge[1]]
+            if u != v:
+                new_edges.add((u, v))
+        meta = DiGraph(new_nodes, new_edges)
         return meta
 
 
@@ -165,14 +136,6 @@ class Graph:
     def count_edges(self):
         return sum([self.degree(node) for node in self.nodes]) // 2
 
-    # def edges_list(self):
-    #     edges = set()
-    #     for v in self.edges.keys():
-    #         for u in self.edges[v]:
-    #             if (v, u) not in edges:
-    #                 edges.add((u, v))
-    #     return edges
-
     def edges_list(self):
         edges = set()
         for v in self.edges.keys():
@@ -181,16 +144,6 @@ class Graph:
         return edges
 
     def add_edge(self, u, v):
-        # if node1 not in self.nodes:
-        #     self.nodes.append(node1)
-        # if node2 not in self.nodes:
-        #     self.nodes.append(node2)
-        # self.edges.append([node1, node2])
-        # if node1 not in self.g:
-        #     self.g[node1] = {}
-        # if node2 not in self.g:
-        #     self.g[node2] = {}
-        # self.g[node1][node2] = {}
         if u not in self.nodes:
             self.nodes.add(u)
             self.edges[u] = set()
@@ -202,17 +155,6 @@ class Graph:
             self.edges[v].add(u)
 
     def remove_node(self, node):
-        # i = 0
-        # while i < self.count_edges():
-        #     if self.edges[i][0] == node or self.edges[i][1] == node:
-        #         self.edges.remove(self.edges[i])
-        #     else:
-        #         i += 1
-        # self.nodes.remove(node)
-        # self.g.pop(node)
-        # for i in self.g.items():
-        #     if node in i[1]:
-        #         i[1].pop(node)
         self.nodes.remove(node)
         self.edges.pop(node)
         for item in self.edges.items():
@@ -306,7 +248,7 @@ class Graph:
                 S = self.intersection(neighbors_u, neighbors_v)
                 S = [x for x in S if x != edge[0] and x != edge[1]]
                 t += len(S)
-        return t // 3
+        return t // 6
 
     def weak_components(self):
         visited = set()
@@ -343,7 +285,6 @@ class Graph:
         else:
             sample = component
 
-        # n = len(component)
         eccentricity = set()
         distances_for_perc = []
 
@@ -367,33 +308,20 @@ class Graph:
                         if neighbour in sample:
                             dst_sample.add(distance[neighbour])
                             distances_for_perc.append(distance[neighbour])
-            # max_dist = 0
-            # for dist in dst_sample:
-            #     max_dist = max(max_dist, dist)
             max_dist = max(dst_sample)
             eccentricity.add(max_dist)
         return [eccentricity, distances_for_perc]
 
     def radius(self):
         eccentricity = list(self.distances()[0])
-        # radius = eccentricity[0]
-        # for i in range(len(eccentricity)):
-        #     radius = min(radius, eccentricity[i])
-        # print(min(eccentricity))
-        # return radius
         return min(eccentricity)
 
     def diameter(self):
         eccentricity = list(self.distances()[0])
-        # d = eccentricity[0]
-        # for i in range(len(eccentricity)):
-        #     d = max(d, eccentricity[i])
-        # return d
         return max(eccentricity)
 
     def percentile(self, percent=90):
         distances = sorted(list(self.distances()[1]))
-        # print(distances)
         perc = distances[int(len(distances) * percent / 100)]
         return perc
 
