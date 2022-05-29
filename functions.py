@@ -126,7 +126,6 @@ class DiGraph:
         return len(self.strong_components().keys())
 
     def strongly_comp_with_max_power(self):
-        # return max(map(len, self.strong_components().values()))
         max_len = 0
         max_comp = -1
         components = self.strong_components()
@@ -168,9 +167,6 @@ class Graph:
         else:
             self.edges = dict([(v, set()) for v in self.nodes])
             for i in e:
-                # if i[1] not in self.edges[i[0]]:
-                #     self.edges[i[0]].add(i[1])
-                #     self.edges[i[1]].add(i[0])
                 self.add_edge(i[0], i[1])
 
     def count_nodes(self):
@@ -326,7 +322,6 @@ class Graph:
             if len(components[i]) > max_len:
                 max_len = len(components[i])
                 max_comp = i
-        # return max(map(len, self.weak_components().values()))
         return components[max_comp]
 
     def nodes_in_weakly_comp_with_max_power(self):
@@ -384,7 +379,6 @@ class Graph:
 
     def remove_x_perc_max_degree(self, x):
         amount = int(self.count_nodes() * x / 100)
-        # del_nodes = [node for node in self.nodes]
         degree = dict()
         for node in self.nodes:
             degree[node] = self.degree(node)
@@ -394,7 +388,6 @@ class Graph:
         return self.nodes_in_weakly_comp_with_max_power() / self.count_nodes()
 
     def select_landmarks_by_degree(self, amount):
-        # nodes = [node for node in self.nodes]
         degree = dict()
         for node in self.nodes:
             degree[node] = self.degree(node)
