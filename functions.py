@@ -129,6 +129,63 @@ class DiGraph:
         #     return meta
         return amount, max_comp, roots, roots_nodes
 
+    def scc3(self):
+        indexes = dict()
+        links = dict()
+        visited = set()
+        done = set()
+        stack_component = []
+        components = dict()
+        counter = 0
+        comp_counter = 0
+
+        for node in self.nodes:
+            if node not in done:
+                stack_nodes = [node]
+
+                while stack_nodes:
+                    s = stack_nodes[-1]
+                    unvisited_node = None
+
+                    if s not in visited:
+                        counter += 1
+                        indexes[s] = counter
+                        links[s] = counter
+                        visited.add(s)
+
+                    for t in self.neighbors(s):
+                        if t not in visited:
+                            unvisited_node = t
+                            stack_nodes.append(t)
+                            break
+
+                    if not unvisited_node:
+                        stack_nodes.pop()
+
+                        for v in self.neighbors(s):
+                            if v not in done:
+                                links[s] = min([links[s], links[v]])
+
+                        stack_component.append(s)
+
+                        if links[s] == indexes[s]:
+                            comp_counter += 1
+
+                            while stack_component:
+                                node = stack_component.pop()
+
+                                if indexes[node] < indexes[s]:
+                                    stack_component.append(node)
+                                    break
+                                else:
+                                    if comp_counter not in components.keys():
+                                        components[comp_counter] = {node}
+                                    else:
+                                        components[comp_counter].add(node)
+                                    done.add(node)
+
+        return components
+
     def number_strongly_components(self):
         return self.strong_components()[0]
 
